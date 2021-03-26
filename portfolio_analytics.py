@@ -34,3 +34,6 @@ class PortfolioAnalytics:
         risk.reset_index(level=0, inplace=True)
         return pd.DataFrame(risk.sort_values(by=['std'], ignore_index=False, ascending=False),
                             columns=['symbol', 'mean', 'std', 'correlation', 'covariance'])
+
+    def get_aggregated_portfolio(self, portfolio, columns):
+        return portfolio.groupby(columns, as_index=False)

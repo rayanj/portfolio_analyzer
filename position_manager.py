@@ -11,9 +11,10 @@ class PortfolioManager:
         weighted_holdings = p.get_aggregated_holdings(p.etfs, p.stocks)
         priced = p.add_prices(weighted_holdings)
         priced.reset_index(level=0, inplace=True)
-        best_prices = priced[~priced.symbol.str.contains('.KS', na=False)]
-        return best_prices
+        return priced[~priced.symbol.str.contains('.KS', na=False)]
 
+    def export_portfolio(self, portfolio, fileName):
+        portfolio.to_csv(fileName)
 
 
 #priced.to_csv('porfolio.csv')

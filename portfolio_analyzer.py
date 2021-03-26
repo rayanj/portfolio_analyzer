@@ -3,6 +3,9 @@ import pandas as pd
 from yahooquery import Ticker
 
 
+
+
+
 def sort_prices(holdings):
     return pd.DataFrame(holdings.sort_values(by=['market_value'], ignore_index=False, ascending=False),
                         columns=['quantity', 'regularMarketPrice', 'market_value'])
@@ -28,14 +31,14 @@ class PositionAnalyzer:
 
     def __init__(self):
         self.portfolio = read_positions()
-        self.tickers = self.portfolio[['Symbol', 'Quantity']]#[5:22]
+        self.tickers = self.portfolio[['Symbol', 'Quantity']]#[5:25]
         self.holdings = self.get_holdings()
         self.stocks = []
         self.etfs = pd.DataFrame(columns=['Symbol', 'Quantity', 'Value'])
         self.separate_stocks_and_etfs()
 
     def get_holdings(self):
-        symbols = self.tickers['Symbol']#[5:20]
+        symbols = self.tickers['Symbol']#[5:25]
         symbols = symbols.dropna().drop_duplicates()
         t = Ticker(symbols)
         return t.fund_top_holdings
