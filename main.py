@@ -17,8 +17,11 @@ tickers = str(tickers).strip()
 stocks = yf.Tickers(tickers).tickers
 print(stocks)
 sectors = []
+i = 1
+total = len(stocks)
 for ticker in stocks:
     try:
+        print("Now fetching: " + str(i) + " of " + str(total))
         print(ticker)
         info = ticker.info
         sectors.append({
@@ -28,8 +31,7 @@ for ticker in stocks:
     except:
         print('bad symbol:')
         continue
-
-
+    i += 1
 
 sectors = pd.DataFrame(sectors, columns=['symbol', 'sector'])
 print(sectors)
@@ -38,7 +40,7 @@ sectors.set_index('symbol')
 
 portfolio = portfolio.merge(sectors, on='symbol', how='inner')
 print(portfolio)
-grouped_portfolio = analytics.get_aggregated_portfolio(portfolio, ['sector','symbol'])
+grouped_portfolio = analytics.get_aggregated_portfolio(portfolio, ['sector'])
 aggregated_portfolio = grouped_portfolio.sum()
 manager.export_portfolio(portfolio, 'portfolio.csv')
 manager.export_portfolio(aggregated_portfolio, 'aggregated_portfolio.csv')
@@ -50,3 +52,13 @@ print('Generating Daily Risk...')
 risk = analytics.get_anualized_risk(returns)
 risk.to_csv('portfolio_risk.csv')
 print(risk)
+risk.set_index('symbol')
+print('Risk of Portfolio...')
+portfolio = portfolio.merge(risk, on='symbol', how='inner')
+print(portfolio)
+analytics.get_aggregated_portfolio(portfolio, ['sector'])
+print('Risk at sector level')
+grouped_portfolio = analytics.get_aggregated_portfolio(portfolio, ['sector'])
+aggregated_portfolio = grouped_portfolio.sum()
+manager.export_portfolio(portfolio, 'portfolio.csv')
+manager.export_portfolio(aggregated_portfolio, 'aggregated_risk_portfolio.csv')
