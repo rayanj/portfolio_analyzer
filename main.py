@@ -1,22 +1,19 @@
-#import position_manager as pm
 import portfolio_analytics as pa
-import matplotlib.pyplot as plt
 
-
-#manager = pm.PortfolioManager()
-#symbols = manager.get_expanded_symbols()
-#print(symbols)
 analytics = pa.PortfolioAnalytics()
+print('Getting top holdings...')
+holdings = analytics.get_Top_holdings_from_portfolio()
+holdings.to_csv('portfolio_top_holdings.csv')
 
-tickers = analytics.get_ticker_from_portfolio()
-print(tickers)
-
+print('Extracting tickers from holdings...')
+tickers = analytics.extract_tickers_from_holdings(holdings)
+print('Generating Daily Returns...')
 data = analytics.download_data(tickers)
-
-norm = analytics.get_normalized_data(data)
-print(norm)
-norm.plot()
-plt.show()
-print(norm)
+returns = analytics.get_daily_returns(data)
+print(returns)
+print('Generating Daily Risk...')
+risk = analytics.get_anualized_risk(returns)
+risk.to_csv('portfolio_risk.csv')
+print(risk)
 
 

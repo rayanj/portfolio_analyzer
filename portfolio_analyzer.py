@@ -28,14 +28,14 @@ class PositionAnalyzer:
 
     def __init__(self):
         self.portfolio = read_positions()
-        self.tickers = self.portfolio[['Symbol', 'Quantity']][5:22]
+        self.tickers = self.portfolio[['Symbol', 'Quantity']]#[5:22]
         self.holdings = self.get_holdings()
         self.stocks = []
         self.etfs = pd.DataFrame(columns=['Symbol', 'Quantity', 'Value'])
         self.separate_stocks_and_etfs()
 
     def get_holdings(self):
-        symbols = self.tickers['Symbol'][5:20]
+        symbols = self.tickers['Symbol']#[5:20]
         symbols = symbols.dropna().drop_duplicates()
         t = Ticker(symbols)
         return t.fund_top_holdings
