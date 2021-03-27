@@ -31,14 +31,14 @@ class PositionAnalyzer:
 
     def __init__(self):
         self.portfolio = read_positions()
-        self.tickers = self.portfolio[['Symbol', 'Quantity']][5:18]
+        self.tickers = self.portfolio[['Symbol', 'Quantity']]#[5:18]
         self.holdings = self.get_holdings()
         self.stocks = []
         self.etfs = pd.DataFrame(columns=['Symbol', 'Quantity', 'Value'])
         self.separate_stocks_and_etfs()
 
     def get_holdings(self):
-        symbols = self.tickers['Symbol'][5:18]
+        symbols = self.tickers['Symbol']#[5:18]
         symbols = symbols.dropna().drop_duplicates()
         t = Ticker(symbols)
         return t.fund_top_holdings
@@ -70,16 +70,21 @@ class PositionAnalyzer:
         symbols = holdings['symbol']
         t = Ticker(symbols)
         ticks = t.price
-        prices = []
-        show_prices = pd.DataFrame.from_dict(ticks, orient='index')
+        cleaned = {k: v for k, v in ticks.items() if 'Quote not found for ticker symbol:' not in v}
+        show_prices = pd.DataFrame.from_dict(cleaned, orient='index')
         show_prices.reset_index(level=0, inplace=True)
-        show_prices.columns = ['symbol', 'value']
-        show_prices = show_prices[show_prices.symbol != '']
-        show_prices = show_prices[~show_prices.value.str.contains('Quote not found for ticker symbol:', na=False)]
-        df = pd.DataFrame.from_records(show_prices['value'].to_list())
-        prices = df[['symbol', 'regularMarketPrice']]
+        show_prices = self.handle_bad_symbols(show_prices)
+        prices = show_prices[['symbol', 'regularMarketPrice']]
         holdings = holdings.set_index('symbol')
         prices = prices.set_index('symbol')
         holdings = holdings.join(prices['regularMarketPrice'])
         holdings['market_value'] = holdings['quantity'] * holdings['regularMarketPrice']
         return sort_prices(holdings)
+
+    def handle_bad_symbols(self, show_prices):
+        if len(show_prices.columns) == 2:
+            show_prices.columns = ['symbol', 'value']
+            show_prices = show_prices[show_prices.symbol != '']
+            show_prices = show_prices[~show_prices.value.str.contains('Quote not found for ticker symbol:', na=False)]
+            show_prices = pd.DataFrame.from_records(show_prices['value'].to_list())
+        return show_prices
